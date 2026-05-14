@@ -1,0 +1,31 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "changeLanguage": "Change Language",
+    "home": "Home",
+    "profile": "Profile",
+    "settings": "Settings",
+    "dashboard": "Dashboard",
+    "tasks": "Tasks",
+    "messages": "Messages",
+    "recentActivity": "Recent Activity",
+    "appearance": "Appearance",
+    "language": "Language",
+    "about": "About",
+    "version": "Version",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "english": "English",
+    "urdu": "Urdu",
+    "today_status": "Here is what's happening today.",
+    "loginSuccess": "Successfully logged in!",
+    "signupSuccess": "Account created successfully!"
+  },
+  "auth": {
+    "login": "Login",
+    "signup": "Sign Up",
+    "email": "Email",
+    "password": "Password"
+  }
+}

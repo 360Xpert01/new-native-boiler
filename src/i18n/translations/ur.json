@@ -1,0 +1,31 @@
+{
+  "common": {
+    "welcome": "خوش آمدید",
+    "changeLanguage": "زبان تبدیل کریں",
+    "home": "ہوم",
+    "profile": "پروفائل",
+    "settings": "ترتیبات",
+    "dashboard": "ڈیش بورڈ",
+    "tasks": "کام",
+    "messages": "پیغامات",
+    "recentActivity": "حالیہ سرگرمی",
+    "appearance": "ظاہری شکل",
+    "language": "زبان",
+    "about": "کے بارے میں",
+    "version": "ورژن",
+    "light": "ہلکا",
+    "dark": "تاریک",
+    "system": "سسٹم",
+    "english": "انگریزی",
+    "urdu": "اردو",
+    "today_status": "یہ ہے کہ آج کیا ہو رہا ہے۔",
+    "loginSuccess": "لاگ ان کامیاب رہا!",
+    "signupSuccess": "اکاؤنٹ کامیابی سے بن گیا!"
+  },
+  "auth": {
+    "login": "لاگ ان",
+    "signup": "سائن اپ",
+    "email": "ای میل",
+    "password": "پاس ورڈ"
+  }
+}

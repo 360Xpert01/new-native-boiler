@@ -1,45 +1,46 @@
+import React from 'react';
+
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+
+import { useNotifications } from '@hooks/useNotifications';
+import { useSocket } from '@hooks/useSocket';
+import AppNavigator from '@navigation/AppNavigator';
+import { ToastProvider } from '@components/Toast/ToastContext';
+import { persistor, store } from '@store/store';
+import { ThemeProvider } from '@theme/ThemeContext';
+
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
+ * AppContent — Inner component that lives inside the Redux Provider.
+ * Hooks that depend on Redux (useNotifications, useSocket) must be
+ * called here, NOT in the outer App component.
  */
+const AppContent = () => {
+  // Initialize Firebase push notifications
+  useNotifications();
+  // Initialize Socket.io connection
+  useSocket();
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+  return (
+    <ThemeProvider>
+      <ToastProvider>
+        <AppNavigator />
+      </ToastProvider>
+    </ThemeProvider>
+  );
+};
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
-
+const App = () => {
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <AppContent />
+        </PersistGate>
+      </Provider>
     </SafeAreaProvider>
   );
-}
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
+};
 
 export default App;
