@@ -36,10 +36,15 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <Header title="Forgot Password" showBack />
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.flex}
+        enabled={Platform.OS === 'ios'}
       >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets={true}
+        >
           {!isSubmitted ? (
             <>
               <Text style={[styles.description, { color: theme.colors.secondaryText }]}>
@@ -97,6 +102,8 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing.lg,
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   description: {
     fontSize: fonts.size.md,

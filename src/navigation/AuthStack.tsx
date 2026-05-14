@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { createStackNavigator } from '@react-navigation/stack';
+import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
 
 import ForgotPasswordScreen from '@screens/Auth/ForgotPasswordScreen';
 import LoginScreen from '@screens/Auth/LoginScreen';
@@ -14,7 +14,12 @@ const Stack = createStackNavigator<AuthStackParamList>();
 
 const AuthStack = () => {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator 
+      screenOptions={{ 
+        headerShown: false,
+        ...TransitionPresets.SlideFromRightIOS, // Smooth industry-standard transition
+      }}
+    >
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />

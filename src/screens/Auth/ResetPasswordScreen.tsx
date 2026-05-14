@@ -50,10 +50,15 @@ const ResetPasswordScreen = ({ route, navigation }: Props) => {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={[styles.container, { backgroundColor: theme.colors.background }]}
+      enabled={Platform.OS === 'ios'}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets={true}
+      >
         <View style={styles.header}>
           <Text style={[styles.title, { color: theme.colors.text }]}>Reset Password</Text>
           <Text style={[styles.subtitle, { color: theme.colors.secondaryText }]}>

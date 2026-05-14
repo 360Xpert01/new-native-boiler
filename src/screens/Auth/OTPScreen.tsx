@@ -8,6 +8,8 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
+  LayoutAnimation,
+  Keyboard,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { StackScreenProps } from '@react-navigation/stack';
@@ -29,6 +31,19 @@ const OTPScreen = ({ route, navigation }: Props) => {
   const { t } = useTranslation();
   const { showToast } = useToast();
   const dispatch = useAppDispatch();
+
+  React.useEffect(() => {
+    const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    });
+    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    });
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
 
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timer, setTimer] = useState(30);
@@ -108,10 +123,15 @@ const OTPScreen = ({ route, navigation }: Props) => {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={[styles.container, { backgroundColor: theme.colors.background }]}
+      enabled={Platform.OS === 'ios'}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets={true}
+      >
         <View style={styles.header}>
           <Text style={[styles.title, { color: theme.colors.text }]}>Verify OTP</Text>
           <Text style={[styles.subtitle, { color: theme.colors.secondaryText }]}>

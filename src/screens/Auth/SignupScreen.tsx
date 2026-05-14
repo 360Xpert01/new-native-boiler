@@ -3,7 +3,7 @@ import React from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, LayoutAnimation, Keyboard } from 'react-native';
 import * as yup from 'yup';
 
 import Button from '@components/Button/Button';
@@ -29,6 +29,19 @@ const SignupScreen = ({ navigation }: any) => {
   const { t } = useTranslation();
   const { showToast } = useToast();
   const dispatch = useAppDispatch();
+
+  React.useEffect(() => {
+    const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    });
+    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    });
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
   const { control, handleSubmit, formState: { errors } } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -51,10 +64,15 @@ const SignupScreen = ({ navigation }: any) => {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={[styles.container, { backgroundColor: theme.colors.background }]}
+      enabled={Platform.OS === 'ios'}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets={true}
+      >
         <View style={styles.header}>
           <Text style={[styles.title, { color: theme.colors.text }]}>Create Account</Text>
           <Text style={[styles.subtitle, { color: theme.colors.secondaryText }]}>Sign up to get started</Text>
