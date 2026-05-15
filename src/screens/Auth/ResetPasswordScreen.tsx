@@ -1,36 +1,45 @@
 import React from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { useForm, Controller } from 'react-hook-form';
+
 import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
+import { useForm, Controller } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { View, Text, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { StackScreenProps } from '@react-navigation/stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import * as yup from 'yup';
 
 import Button from '@components/Button/Button';
+import Header from '@components/Header/Header';
 import Input from '@components/Input/Input';
 import { useToast } from '@components/Toast/ToastContext';
-import { fonts } from '@constants/fonts';
-import { spacing } from '@constants/spacing';
 import { AuthStackParamList } from '@navigation/types';
-import { useTheme } from '@theme/ThemeContext';
 import { useAppDispatch } from '@store/hooks';
 import { setLoading } from '@store/slices/authSlice';
 
 type Props = StackScreenProps<AuthStackParamList, 'ResetPassword'>;
 
 const schema = yup.object().shape({
-  password: yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
-  confirmPassword: yup.string()
+  password: yup
+    .string()
+    .min(6, 'Password must be at least 6 characters')
+    .required('Password is required'),
+  confirmPassword: yup
+    .string()
     .oneOf([yup.ref('password')], 'Passwords must match')
     .required('Confirm password is required'),
 });
 
 const ResetPasswordScreen = ({ route, navigation }: Props) => {
   const { email } = route.params;
-  const { theme } = useTheme();
+  const { t } = useTranslation();
   const { showToast } = useToast();
   const dispatch = useAppDispatch();
 
-  const { control, handleSubmit, formState: { errors } } = useForm({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
       password: '',
@@ -38,42 +47,43 @@ const ResetPasswordScreen = ({ route, navigation }: Props) => {
     },
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async () => {
     dispatch(setLoading(true));
-    // Mock password reset
     setTimeout(() => {
       dispatch(setLoading(false));
-      showToast('Password reset successful! Please login.', 'success');
+      showToast(t('auth.passwordResetSuccess'), 'success');
       navigation.navigate('Login');
     }, 1500);
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-      enabled={Platform.OS === 'ios'}
-    >
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        automaticallyAdjustKeyboardInsets={true}
+    <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
+      <Header title={t('auth.resetPassword')} showBack />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
       >
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: theme.colors.text }]}>Reset Password</Text>
-          <Text style={[styles.subtitle, { color: theme.colors.secondaryText }]}>
-            Enter a new password for {email}
-          </Text>
-        </View>
+        <ScrollView
+          contentContainerClassName="flex-grow justify-center p-lg"
+          keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets
+        >
+          <View className="mb-xxl items-start">
+            <Text className="text-xxxl font-bold text-black dark:text-white text-start">
+              {t('auth.resetPassword')}
+            </Text>
+            <Text className="text-md mt-xs text-gray-600 dark:text-gray-400 text-start">
+              {t('auth.resetPasswordSubtitle', { email })}
+            </Text>
+          </View>
 
-        <View style={styles.form}>
           <Controller
             control={control}
             name="password"
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
-                label="New Password"
-                placeholder="Enter new password"
+                label={t('auth.newPassword')}
+                placeholder={t('auth.enterNewPassword')}
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
@@ -88,8 +98,8 @@ const ResetPasswordScreen = ({ route, navigation }: Props) => {
             name="confirmPassword"
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
-                label="Confirm Password"
-                placeholder="Confirm new password"
+                label={t('auth.confirmPassword')}
+                placeholder={t('auth.confirmNewPassword')}
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
@@ -100,42 +110,14 @@ const ResetPasswordScreen = ({ route, navigation }: Props) => {
           />
 
           <Button
-            title="Update Password"
+            title={t('auth.updatePassword')}
             onPress={handleSubmit(onSubmit)}
-            style={styles.button}
+            className="mt-lg"
           />
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    padding: spacing.lg,
-    justifyContent: 'center',
-  },
-  header: {
-    marginBottom: spacing.xxl,
-  },
-  title: {
-    fontSize: fonts.size.xxxl,
-    fontWeight: fonts.weight.bold,
-  },
-  subtitle: {
-    fontSize: fonts.size.md,
-    marginTop: spacing.xs,
-  },
-  form: {
-    width: '100%',
-  },
-  button: {
-    marginTop: spacing.lg,
-  },
-});
 
 export default ResetPasswordScreen;

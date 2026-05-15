@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+
+import { useTranslation } from 'react-i18next';
 import {
   View,
   Text,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -11,13 +12,12 @@ import {
   LayoutAnimation,
   Keyboard,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
 import { StackScreenProps } from '@react-navigation/stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import Button from '@components/Button/Button';
+import Header from '@components/Header/Header';
 import { useToast } from '@components/Toast/ToastContext';
-import { fonts } from '@constants/fonts';
-import { spacing } from '@constants/spacing';
 import { AuthStackParamList } from '@navigation/types';
 import { useAppDispatch } from '@store/hooks';
 import { setCredentials, setLoading } from '@store/slices/authSlice';
@@ -27,10 +27,14 @@ type Props = StackScreenProps<AuthStackParamList, 'OTP'>;
 
 const OTPScreen = ({ route, navigation }: Props) => {
   const { email, type } = route.params;
-  const { theme } = useTheme();
+  const { isDark } = useTheme();
   const { t } = useTranslation();
   const { showToast } = useToast();
   const dispatch = useAppDispatch();
+
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [timer, setTimer] = useState(30);
+  const inputs = useRef<Array<TextInput | null>>([]);
 
   React.useEffect(() => {
     const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
@@ -45,12 +49,8 @@ const OTPScreen = ({ route, navigation }: Props) => {
     };
   }, []);
 
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [timer, setTimer] = useState(30);
-  const inputs = useRef<Array<TextInput | null>>([]);
-
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (timer > 0) {
       interval = setInterval(() => {
         setTimer((prev) => prev - 1);
@@ -59,12 +59,12 @@ const OTPScreen = ({ route, navigation }: Props) => {
     return () => clearInterval(interval);
   }, [timer]);
 
-  // Auto-submit when OTP is complete
   useEffect(() => {
     const otpValue = otp.join('');
     if (otpValue.length === 6) {
       onVerify();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [otp]);
 
   const handleOtpChange = (value: string, index: number) => {
@@ -72,13 +72,12 @@ const OTPScreen = ({ route, navigation }: Props) => {
     newOtp[index] = value;
     setOtp(newOtp);
 
-    // Auto focus next input
     if (value !== '' && index < 5) {
       inputs.current[index + 1]?.focus();
     }
   };
 
-  const handleKeyPress = (e: any, index: number) => {
+  const handleKeyPress = (e: { nativeEvent: { key: string } }, index: number) => {
     if (e.nativeEvent.key === 'Backspace' && otp[index] === '' && index > 0) {
       inputs.current[index - 1]?.focus();
     }
@@ -87,12 +86,11 @@ const OTPScreen = ({ route, navigation }: Props) => {
   const onVerify = async () => {
     const otpValue = otp.join('');
     if (otpValue.length < 6) {
-      showToast('Please enter the full 6-digit code', 'error');
+      showToast(t('auth.otpRequired'), 'error');
       return;
     }
 
     dispatch(setLoading(true));
-    // Mock verification
     setTimeout(() => {
       dispatch(setLoading(false));
       if (otpValue === '123456') {
@@ -101,15 +99,15 @@ const OTPScreen = ({ route, navigation }: Props) => {
             setCredentials({
               user: { id: '1', email, name: 'New User' },
               token: 'fake-jwt-token',
-            })
+            }),
           );
-          showToast('Account verified successfully!', 'success');
+          showToast(t('auth.accountVerified'), 'success');
         } else {
-          showToast('OTP verified! You can now reset your password.', 'success');
+          showToast(t('auth.otpVerifiedReset'), 'success');
           navigation.navigate('ResetPassword', { email });
         }
       } else {
-        showToast('Invalid OTP. Try 123456', 'error');
+        showToast(t('auth.invalidOtp'), 'error');
       }
     }, 1500);
   };
@@ -117,113 +115,73 @@ const OTPScreen = ({ route, navigation }: Props) => {
   const onResend = () => {
     if (timer === 0) {
       setTimer(30);
-      showToast('New OTP sent to your email', 'success');
+      showToast(t('auth.newOtpSent'), 'success');
     }
   };
 
+  const borderColor = isDark ? '#48484A' : '#E5E5EA';
+  const surfaceColor = isDark ? '#2C2C2E' : '#FFFFFF';
+
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-      enabled={Platform.OS === 'ios'}
-    >
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        automaticallyAdjustKeyboardInsets={true}
+    <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
+      <Header title={t('auth.verifyOtp')} showBack />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
       >
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: theme.colors.text }]}>Verify OTP</Text>
-          <Text style={[styles.subtitle, { color: theme.colors.secondaryText }]}>
-            Enter the 6-digit code sent to {email}
-          </Text>
-        </View>
-
-        <View style={styles.otpContainer}>
-          {otp.map((digit, index) => (
-            <TextInput
-              key={index}
-              ref={(ref) => {
-                inputs.current[index] = ref;
-              }}
-              style={[
-                styles.otpInput,
-                {
-                  color: theme.colors.text,
-                  borderColor: digit ? theme.colors.primary : theme.colors.border,
-                  backgroundColor: theme.colors.surface,
-                },
-              ]}
-              maxLength={1}
-              keyboardType="number-pad"
-              value={digit}
-              onChangeText={(value) => handleOtpChange(value, index)}
-              onKeyPress={(e) => handleKeyPress(e, index)}
-            />
-          ))}
-        </View>
-
-        <View style={styles.timerContainer}>
-          {timer > 0 ? (
-            <Text style={{ color: theme.colors.secondaryText }}>
-              Resend code in <Text style={{ color: theme.colors.primary }}>{timer}s</Text>
+        <ScrollView
+          contentContainerClassName="flex-grow justify-center p-lg"
+          keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets
+        >
+          <View className="mb-xxl items-center">
+            <Text className="text-xxxl font-bold text-black dark:text-white text-center">
+              {t('auth.verifyOtp')}
             </Text>
-          ) : (
-            <TouchableOpacity onPress={onResend}>
-              <Text style={{ color: theme.colors.primary, fontWeight: 'bold' }}>Resend Code</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+            <Text className="text-md mt-xs text-gray-600 dark:text-gray-400 text-center">
+              {t('auth.otpSubtitle', { email })}
+            </Text>
+          </View>
 
-        <Button title="Verify" onPress={onVerify} style={styles.verifyButton} />
-      </ScrollView>
-    </KeyboardAvoidingView>
+          <View className="flex-row justify-between mb-xl">
+            {otp.map((digit, index) => (
+              <TextInput
+                key={index}
+                ref={(ref) => {
+                  inputs.current[index] = ref;
+                }}
+                className="w-[45px] h-[55px] border-2 rounded-xl text-xl font-bold text-center text-black dark:text-white"
+                style={{
+                  borderColor: digit ? '#007AFF' : borderColor,
+                  backgroundColor: surfaceColor,
+                }}
+                maxLength={1}
+                keyboardType="number-pad"
+                value={digit}
+                onChangeText={(value) => handleOtpChange(value, index)}
+                onKeyPress={(e) => handleKeyPress(e, index)}
+              />
+            ))}
+          </View>
+
+          <View className="items-center mb-xxl">
+            {timer > 0 ? (
+              <Text className="text-gray-600 dark:text-gray-400">
+                {t('auth.resendCodeIn')}{' '}
+                <Text className="text-primary font-bold">{timer}s</Text>
+              </Text>
+            ) : (
+              <TouchableOpacity onPress={onResend}>
+                <Text className="text-primary font-bold">{t('auth.resendCode')}</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <Button title={t('auth.verify')} onPress={onVerify} className="mt-md" />
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    padding: spacing.lg,
-    justifyContent: 'center',
-  },
-  header: {
-    marginBottom: spacing.xxl,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: fonts.size.xxxl,
-    fontWeight: fonts.weight.bold,
-  },
-  subtitle: {
-    fontSize: fonts.size.md,
-    marginTop: spacing.xs,
-    textAlign: 'center',
-  },
-  otpContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: spacing.xl,
-  },
-  otpInput: {
-    width: 45,
-    height: 55,
-    borderWidth: 2,
-    borderRadius: 12,
-    fontSize: fonts.size.xl,
-    fontWeight: fonts.weight.bold,
-    textAlign: 'center',
-  },
-  timerContainer: {
-    alignItems: 'center',
-    marginBottom: spacing.xxl,
-  },
-  verifyButton: {
-    marginTop: spacing.md,
-  },
-});
 
 export default OTPScreen;

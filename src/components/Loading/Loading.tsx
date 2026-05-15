@@ -3,8 +3,6 @@ import React from 'react';
 import {
   View,
   ActivityIndicator,
-  StyleSheet,
-  ViewStyle,
   Modal,
 } from 'react-native';
 
@@ -15,7 +13,7 @@ interface LoadingProps {
   isFullScreen?: boolean;
   size?: 'small' | 'large';
   color?: string;
-  style?: ViewStyle;
+  className?: string;
 }
 
 const Loading: React.FC<LoadingProps> = ({
@@ -23,7 +21,7 @@ const Loading: React.FC<LoadingProps> = ({
   isFullScreen = false,
   size = 'large',
   color,
-  style,
+  className,
 }) => {
   const { theme } = useTheme();
   const indicatorColor = color || theme.colors.primary;
@@ -32,9 +30,9 @@ const Loading: React.FC<LoadingProps> = ({
 
   if (isFullScreen) {
     return (
-      <Modal transparent visible={isVisible}>
-        <View style={styles.fullScreen}>
-          <View style={[styles.container, { backgroundColor: theme.colors.card }]}>
+      <Modal transparent visible={isVisible} animationType="fade">
+        <View className="flex-1 bg-black/30 justify-center items-center">
+          <View className="p-lg rounded-xl bg-white dark:bg-gray-800 shadow-lg elevation-5">
             <ActivityIndicator size={size} color={indicatorColor} />
           </View>
         </View>
@@ -43,33 +41,10 @@ const Loading: React.FC<LoadingProps> = ({
   }
 
   return (
-    <View style={[styles.inline, style]}>
+    <View className={`p-md justify-center items-center ${className}`}>
       <ActivityIndicator size={size} color={indicatorColor} />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  fullScreen: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  container: {
-    padding: 20,
-    borderRadius: 12,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  inline: {
-    padding: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
 
 export default Loading;

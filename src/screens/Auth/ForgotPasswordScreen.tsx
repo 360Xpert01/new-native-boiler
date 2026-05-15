@@ -1,131 +1,81 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, Controller } from 'react-hook-form';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { View, Text, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import * as yup from 'yup';
 
 import Button from '@components/Button/Button';
 import Header from '@components/Header/Header';
 import Input from '@components/Input/Input';
-import { fonts } from '@constants/fonts';
-import { spacing } from '@constants/spacing';
-import { useTheme } from '@theme/ThemeContext';
 
 const schema = yup.object().shape({
   email: yup.string().email('Invalid email').required('Email is required'),
 });
 
-const ForgotPasswordScreen = ({ navigation }: any) => {
-  const { theme } = useTheme();
-  const [isSubmitted, setIsSubmitted] = useState(false);
+const ForgotPasswordScreen = ({
+  navigation,
+}: {
+  navigation: { navigate: (screen: string, params?: object) => void };
+}) => {
+  const { t } = useTranslation();
 
-  const { control, handleSubmit, formState: { errors } } = useForm({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     resolver: yupResolver(schema),
-    defaultValues: {
-      email: '',
-    },
+    defaultValues: { email: '' },
   });
 
-  const onSubmit = (data: any) => {
-    console.log('Reset password for:', data.email);
+  const onSubmit = (data: { email: string }) => {
     navigation.navigate('OTP', { email: data.email, type: 'forgotPassword' });
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Header title="Forgot Password" showBack />
+    <View className="flex-1 bg-white dark:bg-gray-900">
+      <Header title={t('auth.forgotPasswordTitle')} showBack />
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.flex}
-        enabled={Platform.OS === 'ios'}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
       >
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent}
+        <ScrollView
+          contentContainerClassName="flex-grow justify-center p-lg"
           keyboardShouldPersistTaps="handled"
-          automaticallyAdjustKeyboardInsets={true}
+          automaticallyAdjustKeyboardInsets
         >
-          {!isSubmitted ? (
-            <>
-              <Text style={[styles.description, { color: theme.colors.secondaryText }]}>
-                Enter your email address and we'll send you instructions to reset your password.
-              </Text>
+          <Text className="text-md mb-xl text-gray-600 dark:text-gray-400 text-start">
+            {t('auth.forgotPasswordDescription')}
+          </Text>
 
-              <Controller
-                control={control}
-                name="email"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    label="Email"
-                    placeholder="Enter your email"
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                    error={errors.email?.message}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                  />
-                )}
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label={t('auth.email')}
+                placeholder={t('auth.email')}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                error={errors.email?.message}
+                keyboardType="email-address"
+                autoCapitalize="none"
               />
+            )}
+          />
 
-              <Button
-                title="Send Instructions"
-                onPress={handleSubmit(onSubmit)}
-                style={styles.button}
-              />
-            </>
-          ) : (
-            <View style={styles.successContainer}>
-              <Text style={[styles.successTitle, { color: theme.colors.text }]}>Check your email</Text>
-              <Text style={[styles.successDescription, { color: theme.colors.secondaryText }]}>
-                We've sent password reset instructions to your email address.
-              </Text>
-              <Button
-                title="Back to Login"
-                onPress={() => navigation.navigate('Login')}
-                style={styles.button}
-              />
-            </View>
-          )}
+          <Button
+            title={t('auth.sendInstructions')}
+            onPress={handleSubmit(onSubmit)}
+            className="mt-lg"
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  flex: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: spacing.lg,
-    flexGrow: 1,
-    justifyContent: 'center',
-  },
-  description: {
-    fontSize: fonts.size.md,
-    marginBottom: spacing.xl,
-  },
-  button: {
-    marginTop: spacing.lg,
-  },
-  successContainer: {
-    alignItems: 'center',
-    paddingTop: spacing.xxl,
-  },
-  successTitle: {
-    fontSize: fonts.size.xl,
-    fontWeight: fonts.weight.bold,
-    marginBottom: spacing.md,
-  },
-  successDescription: {
-    fontSize: fonts.size.md,
-    textAlign: 'center',
-    marginBottom: spacing.xxl,
-  },
-});
 
 export default ForgotPasswordScreen;

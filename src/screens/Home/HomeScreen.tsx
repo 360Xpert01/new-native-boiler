@@ -1,148 +1,122 @@
 import React from 'react';
 
 import { useTranslation } from 'react-i18next';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 
 import Header from '@components/Header/Header';
-import { fonts } from '@constants/fonts';
-import { spacing } from '@constants/spacing';
+import Button from '@components/Button/Button';
+import { useLocation } from '@hooks/useLocation';
 import { useAppSelector } from '@store/hooks';
 import { selectSocketConnected } from '@store/slices/socketSlice';
 import { useTheme } from '@theme/ThemeContext';
 
 const HomeScreen = () => {
-  const { theme } = useTheme();
+  const { isDark } = useTheme();
   const { t } = useTranslation();
   const { user } = useAppSelector((state) => state.auth);
   const isConnected = useAppSelector(selectSocketConnected);
+  const { latitude, longitude, loading, error, getCurrentLocation } = useLocation();
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Header title={t('common.dashboard')} />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Socket Status Indicator */}
-        <View style={[styles.statusBanner, { backgroundColor: isConnected ? theme.colors.success + '20' : theme.colors.error + '20' }]}>
-          <View style={[styles.statusDot, { backgroundColor: isConnected ? theme.colors.success : theme.colors.error }]} />
-          <Text style={[styles.statusText, { color: isConnected ? theme.colors.success : theme.colors.error }]}>
-            Socket: {isConnected ? 'Connected' : 'Disconnected'}
+    <View className="flex-1 bg-white dark:bg-gray-900">
+      <Header title={t('common.dashboard')} showBack={false} />
+      <ScrollView contentContainerClassName="p-md">
+        <View
+          className={`flex-row items-center p-sm rounded-lg mb-md ${
+            isConnected ? 'bg-success/20' : 'bg-error/20'
+          }`}
+        >
+          <View
+            className={`w-2 h-2 rounded-full me-sm ${
+              isConnected ? 'bg-success' : 'bg-error'
+            }`}
+          />
+          <Text
+            className={`text-sm font-bold text-start ${
+              isConnected ? 'text-success' : 'text-error'
+            }`}
+          >
+            {t('auth.socketStatus')}:{' '}
+            {isConnected ? t('auth.socketConnected') : t('auth.socketDisconnected')}
           </Text>
         </View>
-        <View style={styles.welcomeSection}>
-          <Text style={[styles.welcomeText, { color: theme.colors.text }]}>
+
+        <View className="mb-lg items-start">
+          <Text className="text-xxl font-bold text-black dark:text-white text-start">
             {t('common.welcome')}, {user?.name || 'User'}!
           </Text>
-          <Text style={[styles.subtitle, { color: theme.colors.secondaryText }]}>
+          <Text className="text-md mt-xs text-gray-600 dark:text-gray-400 text-start">
             {t('common.today_status')}
           </Text>
         </View>
 
-        <View style={styles.statsContainer}>
-          <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-            <Text style={[styles.cardTitle, { color: theme.colors.secondaryText }]}>{t('common.tasks')}</Text>
-            <Text style={[styles.cardValue, { color: theme.colors.text }]}>12</Text>
+        <View className="flex-row justify-between mb-lg">
+          <View className="flex-1 p-md rounded-xl border border-gray-200 dark:border-gray-800 mx-xs bg-white dark:bg-gray-800 items-start">
+            <Text className="text-sm font-medium text-gray-600 dark:text-gray-400 text-start">
+              {t('common.tasks')}
+            </Text>
+            <Text className="text-xl font-bold mt-xs text-black dark:text-white text-start">
+              12
+            </Text>
           </View>
-          <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-            <Text style={[styles.cardTitle, { color: theme.colors.secondaryText }]}>{t('common.messages')}</Text>
-            <Text style={[styles.cardValue, { color: theme.colors.text }]}>5</Text>
+          <View className="flex-1 p-md rounded-xl border border-gray-200 dark:border-gray-800 mx-xs bg-white dark:bg-gray-800 items-start">
+            <Text className="text-sm font-medium text-gray-600 dark:text-gray-400 text-start">
+              {t('common.messages')}
+            </Text>
+            <Text className="text-xl font-bold mt-xs text-black dark:text-white text-start">
+              5
+            </Text>
           </View>
         </View>
 
-        <View style={[styles.mainCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-          <Text style={[styles.mainCardTitle, { color: theme.colors.text }]}>{t('common.recentActivity')}</Text>
-          <View style={styles.activityItem}>
-            <View style={[styles.dot, { backgroundColor: theme.colors.primary }]} />
-            <Text style={[styles.activityText, { color: theme.colors.text }]}>Logged in successfully</Text>
+        <View className="p-lg rounded-xl border border-gray-200 dark:border-gray-800 mb-lg bg-white dark:bg-gray-800 items-start">
+          <Text className="text-lg font-bold mb-md text-black dark:text-white text-start">
+            {t('common.location')}
+          </Text>
+          {latitude && longitude ? (
+            <View className="mb-sm items-start">
+              <Text className="text-md mb-xs text-black dark:text-white text-start">
+                {t('common.latitude')}: {latitude.toFixed(6)}
+              </Text>
+              <Text className="text-md mb-xs text-black dark:text-white text-start">
+                {t('common.longitude')}: {longitude.toFixed(6)}
+              </Text>
+            </View>
+          ) : error ? (
+            <Text className="text-sm italic text-error text-start">{error}</Text>
+          ) : (
+            <Text className="text-md text-gray-600 dark:text-gray-400 text-start">
+              {t('common.noLocationData')}
+            </Text>
+          )}
+          <Button
+            title={t('common.getLocation')}
+            onPress={getCurrentLocation}
+            loading={loading}
+            className="mt-md w-full"
+          />
+        </View>
+
+        <View className="p-lg rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 items-start">
+          <Text className="text-lg font-bold mb-md text-black dark:text-white text-start">
+            {t('common.recentActivity')}
+          </Text>
+          <View className="flex-row items-center mb-sm">
+            <View className="w-2 h-2 rounded-full me-sm bg-primary" />
+            <Text className="text-md text-black dark:text-white text-start">
+              {t('common.loginSuccess')}
+            </Text>
           </View>
-          <View style={styles.activityItem}>
-            <View style={[styles.dot, { backgroundColor: theme.colors.success }]} />
-            <Text style={[styles.activityText, { color: theme.colors.text }]}>Profile updated</Text>
+          <View className="flex-row items-center mb-sm">
+            <View className="w-2 h-2 rounded-full me-sm bg-success" />
+            <Text className="text-md text-black dark:text-white text-start">
+              {t('common.profileUpdated')}
+            </Text>
           </View>
         </View>
       </ScrollView>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: spacing.md,
-  },
-  statusBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing.sm,
-    borderRadius: 8,
-    marginBottom: spacing.md,
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: spacing.sm,
-  },
-  statusText: {
-    fontSize: fonts.size.sm,
-    fontWeight: fonts.weight.bold,
-  },
-  welcomeSection: {
-    marginBottom: spacing.lg,
-  },
-  welcomeText: {
-    fontSize: fonts.size.xxl,
-    fontWeight: fonts.weight.bold,
-  },
-  subtitle: {
-    fontSize: fonts.size.md,
-    marginTop: spacing.xs,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: spacing.lg,
-  },
-  card: {
-    flex: 1,
-    padding: spacing.md,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginHorizontal: spacing.xs,
-  },
-  cardTitle: {
-    fontSize: fonts.size.sm,
-    fontWeight: fonts.weight.medium,
-  },
-  cardValue: {
-    fontSize: fonts.size.xl,
-    fontWeight: fonts.weight.bold,
-    marginTop: spacing.xs,
-  },
-  mainCard: {
-    padding: spacing.lg,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  mainCardTitle: {
-    fontSize: fonts.size.lg,
-    fontWeight: fonts.weight.bold,
-    marginBottom: spacing.md,
-  },
-  activityItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: spacing.sm,
-  },
-  activityText: {
-    fontSize: fonts.size.md,
-  },
-});
 
 export default HomeScreen;

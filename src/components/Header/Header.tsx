@@ -4,23 +4,23 @@ import { useNavigation } from '@react-navigation/native';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   ViewStyle,
   TextStyle,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-import { fonts } from '@constants/fonts';
-import { spacing } from '@constants/spacing';
+import { useLanguage } from '@hooks/useLanguage';
 import { useTheme } from '@theme/ThemeContext';
-
+import { backChevronIcon } from '@utils/rtl';
 
 interface HeaderProps {
   title?: string;
   showBack?: boolean;
   onBackPress?: () => void;
   rightComponent?: React.ReactNode;
+  className?: string;
+  titleClassName?: string;
   style?: ViewStyle;
   titleStyle?: TextStyle;
 }
@@ -30,10 +30,13 @@ const Header: React.FC<HeaderProps> = ({
   showBack,
   onBackPress,
   rightComponent,
+  className,
+  titleClassName,
   style,
   titleStyle,
 }) => {
-  const { theme } = useTheme();
+  const { isDark } = useTheme();
+  const { isRTL } = useLanguage();
   const navigation = useNavigation();
 
   const handleBackPress = () => {
@@ -48,74 +51,40 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: theme.colors.background,
-          borderBottomColor: theme.colors.border,
-        },
-        style,
-      ]}
+      className={`h-[56px] flex-row items-center justify-between px-sm border-b-[0.5px] bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 ${className}`}
+      style={style}
     >
-      <View style={styles.leftContainer}>
+      <View className="flex-1 justify-center items-start">
         {canGoBack && (
           <TouchableOpacity
             onPress={handleBackPress}
-            style={styles.backButton}
+            className="p-xs"
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Icon name="chevron-left" size={30} color={theme.colors.text} />
+            <Icon
+              name={backChevronIcon(isRTL)}
+              size={30}
+              color={isDark ? '#FFFFFF' : '#000000'}
+            />
           </TouchableOpacity>
         )}
       </View>
 
-      <View style={styles.titleContainer}>
+      <View className="flex-[3] justify-center items-center">
         {title && (
           <Text
             numberOfLines={1}
-            style={[styles.title, { color: theme.colors.text }, titleStyle]}
+            className={`text-lg font-bold text-black dark:text-white text-center ${titleClassName}`}
+            style={titleStyle}
           >
             {title}
           </Text>
         )}
       </View>
 
-      <View style={styles.rightContainer}>{rightComponent}</View>
+      <View className="flex-1 justify-center items-end">{rightComponent}</View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    height: 56,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  leftContainer: {
-    flex: 1,
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-  },
-  titleContainer: {
-    flex: 3,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rightContainer: {
-    flex: 1,
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-  },
-  backButton: {
-    padding: spacing.xs,
-  },
-  title: {
-    fontSize: fonts.size.lg,
-    fontWeight: fonts.weight.bold,
-  },
-});
 
 export default Header;

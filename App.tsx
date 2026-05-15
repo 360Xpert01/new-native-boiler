@@ -1,4 +1,5 @@
 import React from 'react';
+import './global.css';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
@@ -10,6 +11,7 @@ import { useSocket } from '@hooks/useSocket';
 import AppNavigator from '@navigation/AppNavigator';
 import { ToastProvider } from '@components/Toast/ToastContext';
 import { persistor, store } from '@store/store';
+import { LanguageProvider } from '@i18n/LanguageContext';
 import { ThemeProvider } from '@theme/ThemeContext';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -28,11 +30,13 @@ const AppContent = () => {
   useSocket();
 
   return (
-    <ThemeProvider>
-      <ToastProvider>
-        <AppNavigator />
-      </ToastProvider>
-    </ThemeProvider>
+    <LanguageProvider>
+      <ThemeProvider>
+        <ToastProvider>
+          <AppNavigator />
+        </ToastProvider>
+      </ThemeProvider>
+    </LanguageProvider>
   );
 };
 

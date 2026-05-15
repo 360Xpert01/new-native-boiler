@@ -1,14 +1,11 @@
 import React from 'react';
 
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { View, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-import { fonts } from '@constants/fonts';
-import { spacing } from '@constants/spacing';
+import Button from '@components/Button/Button';
 import { useTheme } from '@theme/ThemeContext';
 
-
-import Button from '../Button/Button';
 
 interface EmptyStateProps {
   icon?: string;
@@ -16,7 +13,7 @@ interface EmptyStateProps {
   message?: string;
   onAction?: () => void;
   actionTitle?: string;
-  style?: ViewStyle;
+  className?: string;
 }
 
 const EmptyState: React.FC<EmptyStateProps> = ({
@@ -25,16 +22,16 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   message,
   onAction,
   actionTitle,
-  style,
+  className,
 }) => {
-  const { theme } = useTheme();
+  const { isDark } = useTheme();
 
   return (
-    <View style={[styles.container, style]}>
-      <Icon name={icon} size={80} color={theme.colors.placeholder} />
-      <Text style={[styles.title, { color: theme.colors.text }]}>{title}</Text>
+    <View className={`flex-1 justify-center items-center p-xl ${className}`}>
+      <Icon name={icon} size={80} color={isDark ? '#48484A' : '#C7C7CC'} />
+      <Text className="text-xl font-bold mt-md text-center text-black dark:text-white">{title}</Text>
       {message && (
-        <Text style={[styles.message, { color: theme.colors.secondaryText }]}>
+        <Text className="text-md text-center mt-sm mb-lg text-gray-600 dark:text-gray-400">
           {message}
         </Text>
       )}
@@ -42,35 +39,11 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         <Button
           title={actionTitle}
           onPress={onAction}
-          style={styles.button}
+          className="min-w-[150px]"
         />
       )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.xl,
-  },
-  title: {
-    fontSize: fonts.size.xl,
-    fontWeight: fonts.weight.bold,
-    marginTop: spacing.md,
-    textAlign: 'center',
-  },
-  message: {
-    fontSize: fonts.size.md,
-    textAlign: 'center',
-    marginTop: spacing.sm,
-    marginBottom: spacing.lg,
-  },
-  button: {
-    minWidth: 150,
-  },
-});
 
 export default EmptyState;

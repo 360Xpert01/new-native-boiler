@@ -1,12 +1,11 @@
 import React from 'react';
 
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import EmptyState from '@components/EmptyState/EmptyState';
 import Header from '@components/Header/Header';
-import { fonts } from '@constants/fonts';
-import { spacing } from '@constants/spacing';
 import type { NotificationPayload } from '@services/notifications/notificationService';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
 import {
@@ -17,12 +16,11 @@ import {
 } from '@store/slices/notificationSlice';
 import { useTheme } from '@theme/ThemeContext';
 
-
 const NotificationsScreen = () => {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
 
-  // Real notifications from Redux (populated by Firebase push notifications)
   const notifications = useAppSelector(selectNotifications);
   const unreadCount = useAppSelector(selectUnreadCount);
 
@@ -32,7 +30,6 @@ const NotificationsScreen = () => {
 
   const handleNotificationPress = (id: string) => {
     dispatch(markAsRead(id));
-    // TODO: Navigate to relevant screen based on notification data
   };
 
   const formatTime = (timestamp: number) => {
@@ -43,53 +40,46 @@ const NotificationsScreen = () => {
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffMins < 1) {return 'Just now';}
-    if (diffMins < 60) {return `${diffMins}m ago`;}
-    if (diffHours < 24) {return `${diffHours}h ago`;}
-    return `${diffDays}d ago`;
+    if (diffMins < 1) {
+      return t('common.justNow');
+    }
+    if (diffMins < 60) {
+      return `${diffMins}${t('common.m_ago')}`;
+    }
+    if (diffHours < 24) {
+      return `${diffHours}${t('common.h_ago')}`;
+    }
+    return `${diffDays}${t('common.d_ago')}`;
   };
 
   const renderItem = ({ item }: { item: NotificationPayload }) => (
     <TouchableOpacity
       onPress={() => handleNotificationPress(item.id)}
       activeOpacity={0.7}
-      style={[
-        styles.item,
-        {
-          borderBottomColor: theme.colors.border,
-          backgroundColor: item.read
-            ? 'transparent'
-            : theme.colors.primary + '10', // subtle unread highlight
-        },
-      ]}
+      className={`p-md border-b border-gray-100 dark:border-gray-800 ${
+        item.read ? 'bg-transparent' : 'bg-primary/10'
+      }`}
     >
-      <View style={styles.itemRow}>
-        {/* Unread dot indicator */}
+      <View className="flex-row items-start">
         {!item.read && (
-          <View
-            style={[styles.unreadDot, { backgroundColor: theme.colors.primary }]}
-          />
+          <View className="w-2 h-2 rounded-full mt-1.5 bg-primary me-sm" />
         )}
-        <View style={styles.itemContent}>
-          <View style={styles.itemHeader}>
+        <View className="flex-1">
+          <View className="flex-row items-center justify-between">
             <Text
-              style={[
-                styles.itemTitle,
-                {
-                  color: theme.colors.text,
-                  fontWeight: item.read ? fonts.weight.medium : fonts.weight.bold,
-                },
-              ]}
+              className={`flex-1 text-md text-start me-sm text-black dark:text-white ${
+                item.read ? 'font-medium' : 'font-bold'
+              }`}
               numberOfLines={1}
             >
               {item.title}
             </Text>
-            <Text style={[styles.itemTime, { color: theme.colors.secondaryText }]}>
+            <Text className="text-xs text-gray-500 dark:text-gray-400">
               {formatTime(item.timestamp)}
             </Text>
           </View>
           <Text
-            style={[styles.itemBody, { color: theme.colors.secondaryText }]}
+            className="text-sm mt-xs text-gray-600 dark:text-gray-400 text-start"
             numberOfLines={2}
           >
             {item.body}
@@ -100,12 +90,13 @@ const NotificationsScreen = () => {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View className="flex-1 bg-white dark:bg-gray-900">
       <Header
-        title="Notifications"
+        title={t('common.notifications')}
+        showBack={false}
         rightComponent={
           unreadCount > 0 ? (
-            <TouchableOpacity onPress={handleMarkAllRead} style={styles.markAllBtn}>
+            <TouchableOpacity onPress={handleMarkAllRead} className="p-xs">
               <Icon name="check-all" size={22} color={theme.colors.primary} />
             </TouchableOpacity>
           ) : undefined
@@ -117,62 +108,15 @@ const NotificationsScreen = () => {
         renderItem={renderItem}
         ListEmptyComponent={
           <EmptyState
-            title="No Notifications"
-            message="You don't have any notifications at the moment."
+            title={t('common.noNotifications')}
+            message={t('common.noNotificationsMsg')}
             icon="bell-off-outline"
           />
         }
-        contentContainerStyle={styles.listContent}
+        contentContainerClassName="flex-grow"
       />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  listContent: {
-    flexGrow: 1,
-  },
-  item: {
-    padding: spacing.md,
-    borderBottomWidth: 1,
-  },
-  itemRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  unreadDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginTop: 6,
-    marginRight: spacing.sm,
-  },
-  itemContent: {
-    flex: 1,
-  },
-  itemHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  itemTitle: {
-    fontSize: fonts.size.md,
-    flex: 1,
-    marginRight: spacing.sm,
-  },
-  itemTime: {
-    fontSize: fonts.size.xs,
-  },
-  itemBody: {
-    fontSize: fonts.size.sm,
-    marginTop: spacing.xs,
-  },
-  markAllBtn: {
-    padding: spacing.xs,
-  },
-});
 
 export default NotificationsScreen;

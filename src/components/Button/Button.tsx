@@ -3,115 +3,76 @@ import React from 'react';
 import {
   TouchableOpacity,
   Text,
-  StyleSheet,
   ActivityIndicator,
-  ViewStyle,
-  TextStyle,
   TouchableOpacityProps,
 } from 'react-native';
 
-import { fonts } from '@constants/fonts';
-import { spacing } from '@constants/spacing';
 import { useTheme } from '@theme/ThemeContext';
 
 interface ButtonProps extends TouchableOpacityProps {
   title: string;
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   loading?: boolean;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
+  className?: string;
+  textClassName?: string;
 }
+
 
 const Button: React.FC<ButtonProps> = ({
   title,
   variant = 'primary',
   loading = false,
   disabled,
-  style,
-  textStyle,
+  className,
+  textClassName,
   ...props
 }) => {
-  const { theme } = useTheme();
+  const { isDark } = useTheme();
+  const isButtonDisabled = disabled || loading;
 
-  const getVariantStyles = () => {
-    switch (variant) {
-      case 'primary':
-        return {
-          container: { backgroundColor: theme.colors.primary },
-          text: { color: theme.colors.primaryText },
-        };
-      case 'secondary':
-        return {
-          container: { backgroundColor: theme.colors.surface },
-          text: { color: theme.colors.text },
-        };
-      case 'outline':
-        return {
-          container: {
-            backgroundColor: 'transparent',
-            borderWidth: 1,
-            borderColor: theme.colors.primary,
-          },
-          text: { color: theme.colors.primary },
-        };
-      case 'ghost':
-        return {
-          container: { backgroundColor: 'transparent' },
-          text: { color: theme.colors.primary },
-        };
-      case 'danger':
-        return {
-          container: { backgroundColor: theme.colors.error },
-          text: { color: theme.colors.primaryText },
-        };
-      default:
-        return {
-          container: { backgroundColor: theme.colors.primary },
-          text: { color: theme.colors.primaryText },
-        };
-    }
+  const variantClasses = {
+    primary: 'bg-primary',
+    secondary: 'bg-gray-100 dark:bg-gray-800',
+    outline: 'bg-transparent border border-primary',
+    ghost: 'bg-transparent',
+    danger: 'bg-error',
   };
 
-  const variantStyles = getVariantStyles();
-  const isButtonDisabled = disabled || loading;
+  const textVariantClasses = {
+    primary: 'text-white',
+    secondary: 'text-black dark:text-white',
+    outline: 'text-primary',
+    ghost: 'text-primary',
+    danger: 'text-white',
+  };
+
+  const indicatorColor = variant === 'secondary' ? (isDark ? '#FFFFFF' : '#000000') : '#FFFFFF';
 
   return (
     <TouchableOpacity
-      style={[
-        styles.container,
-        variantStyles.container,
-        isButtonDisabled && styles.disabled,
-        style,
-      ]}
+      className={`h-[50px] rounded-lg justify-center items-center px-md ${
+        variantClasses[variant]
+      } ${isButtonDisabled ? 'opacity-50' : ''} ${className}`}
       disabled={isButtonDisabled}
       activeOpacity={0.7}
       accessibilityRole="button"
       {...props}
     >
       {loading ? (
-        <ActivityIndicator color={variantStyles.text.color} />
+        <ActivityIndicator color={indicatorColor} />
       ) : (
-        <Text style={[styles.text, variantStyles.text, textStyle]}>{title}</Text>
+        <Text 
+          className={`text-md font-semibold ${
+            textVariantClasses[variant]
+          } ${textClassName}`}
+        >
+          {title}
+        </Text>
       )}
     </TouchableOpacity>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    height: 50,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-  },
-  text: {
-    fontSize: fonts.size.md,
-    fontWeight: fonts.weight.semiBold,
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-});
 
 export default Button;
+

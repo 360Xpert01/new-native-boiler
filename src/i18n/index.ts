@@ -1,6 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import * as RNLocalize from 'react-native-localize';
+
+import { DEFAULT_LANGUAGE } from '@i18n/config';
 
 import en from './translations/en.json';
 import ur from './translations/ur.json';
@@ -10,20 +11,15 @@ const resources = {
   ur: { translation: ur },
 };
 
-// Detect user language
-const locales = RNLocalize.getLocales();
-const languageCode = locales[0]?.languageCode || 'en';
-
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: languageCode,
-    fallbackLng: 'en',
-    interpolation: {
-      escapeValue: false, // react already safes from xss
-    },
-    compatibilityJSON: 'v4', // Required for React Native
-  });
+i18n.use(initReactI18next).init({
+  resources,
+  lng: DEFAULT_LANGUAGE,
+  fallbackLng: 'en',
+  supportedLngs: ['en', 'ur'],
+  interpolation: {
+    escapeValue: false,
+  },
+  compatibilityJSON: 'v4',
+});
 
 export default i18n;

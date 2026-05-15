@@ -1,94 +1,71 @@
 import React from 'react';
 
 import { useTranslation } from 'react-i18next';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, I18nManager } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import Header from '@components/Header/Header';
-import { fonts } from '@constants/fonts';
-import { spacing } from '@constants/spacing';
+import LanguagePicker from '@components/LanguagePicker/LanguagePicker';
 import { useTheme } from '@theme/ThemeContext';
 
-
 const SettingsScreen = () => {
-  const { theme, themeMode, setThemeMode } = useTheme();
-  const { t, i18n } = useTranslation();
-
-  const currentLanguage = i18n.language;
-
+  const { themeMode, setThemeMode, isDark } = useTheme();
+  const { t } = useTranslation();
   const themeOptions = [
     { label: t('common.light'), value: 'light', icon: 'white-balance-sunny' },
     { label: t('common.dark'), value: 'dark', icon: 'moon-waning-crescent' },
     { label: t('common.system'), value: 'system', icon: 'brightness-auto' },
   ];
 
-  const languageOptions = [
-    { label: t('common.english'), value: 'en', icon: 'alphabetical' },
-    { label: t('common.urdu'), value: 'ur', icon: 'alphabetical-variant' },
-  ];
-
-  const changeLanguage = (lang: string) => {
-    i18n.changeLanguage(lang);
-  };
+  const iconColor = isDark ? '#FFFFFF' : '#000000';
+  const activeColor = '#007AFF';
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View className="flex-1 bg-white dark:bg-gray-900">
       <Header title={t('common.settings')} />
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>{t('common.appearance')}</Text>
-          <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+      <ScrollView contentContainerClassName="p-lg">
+        <View className="mb-xl">
+          <Text className="text-sm font-bold uppercase mb-sm px-xs text-primary text-start">
+            {t('common.appearance')}
+          </Text>
+          <View className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-800">
             {themeOptions.map((option, index) => (
               <TouchableOpacity
                 key={option.value}
-                style={[
-                  styles.option,
-                  index !== themeOptions.length - 1 && { borderBottomColor: theme.colors.border, borderBottomWidth: 1 },
-                ]}
-                onPress={() => setThemeMode(option.value as any)}
+                className={`flex-row items-center justify-between p-md ${
+                  index !== themeOptions.length - 1
+                    ? 'border-b border-gray-200 dark:border-gray-800'
+                    : ''
+                }`}
+                onPress={() => setThemeMode(option.value as 'light' | 'dark' | 'system')}
               >
-                <View style={styles.optionLeft}>
-                  <Icon name={option.icon as any} size={24} color={theme.colors.text} />
-                  <Text style={[styles.optionLabel, { color: theme.colors.text }]}>{option.label}</Text>
+                <View className="flex-row items-center">
+                  <Icon name={option.icon as 'white-balance-sunny'} size={24} color={iconColor} />
+                  <Text className="text-md text-black dark:text-white ms-md">{option.label}</Text>
                 </View>
                 {themeMode === option.value && (
-                  <Icon name="check" size={24} color={theme.colors.primary} />
+                  <Icon name="check" size={24} color={activeColor} />
                 )}
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>{t('common.language')}</Text>
-          <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-            {languageOptions.map((option, index) => (
-              <TouchableOpacity
-                key={option.value}
-                style={[
-                  styles.option,
-                  index !== languageOptions.length - 1 && { borderBottomColor: theme.colors.border, borderBottomWidth: 1 },
-                ]}
-                onPress={() => changeLanguage(option.value)}
-              >
-                <View style={styles.optionLeft}>
-                  <Icon name={option.icon as any} size={24} color={theme.colors.text} />
-                  <Text style={[styles.optionLabel, { color: theme.colors.text }]}>{option.label}</Text>
-                </View>
-                {currentLanguage === option.value && (
-                  <Icon name="check" size={24} color={theme.colors.primary} />
-                )}
-              </TouchableOpacity>
-            ))}
-          </View>
+        <View className="mb-xl">
+          <Text className="text-sm font-bold uppercase mb-sm px-xs text-primary text-start">
+            {t('common.language')}
+          </Text>
+          <LanguagePicker variant="list" />
         </View>
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>{t('common.about')}</Text>
-          <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-            <View style={styles.infoRow}>
-              <Text style={[styles.infoLabel, { color: theme.colors.text }]}>{t('common.version')}</Text>
-              <Text style={[styles.infoValue, { color: theme.colors.secondaryText }]}>1..0</Text>
+        <View className="mb-xl">
+          <Text className="text-sm font-bold uppercase mb-sm px-xs text-primary text-start">
+            {t('common.about')}
+          </Text>
+          <View className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-800">
+            <View className="flex-row items-center justify-between p-md">
+              <Text className="text-md text-black dark:text-white">{t('common.version')}</Text>
+              <Text className="text-md text-gray-600 dark:text-gray-400">1.0.0</Text>
             </View>
           </View>
         </View>
@@ -96,55 +73,5 @@ const SettingsScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    padding: spacing.lg,
-  },
-  section: {
-    marginBottom: spacing.xl,
-  },
-  sectionTitle: {
-    fontSize: fonts.size.sm,
-    fontWeight: fonts.weight.bold,
-    textTransform: 'uppercase',
-    marginBottom: spacing.sm,
-    marginLeft: spacing.xs,
-  },
-  card: {
-    borderRadius: 12,
-    borderWidth: 1,
-    overflow: 'hidden',
-  },
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: spacing.md,
-  },
-  optionLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  optionLabel: {
-    marginLeft: spacing.md,
-    fontSize: fonts.size.md,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: spacing.md,
-  },
-  infoLabel: {
-    fontSize: fonts.size.md,
-  },
-  infoValue: {
-    fontSize: fonts.size.md,
-  },
-});
 
 export default SettingsScreen;

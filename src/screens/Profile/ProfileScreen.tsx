@@ -1,139 +1,99 @@
 import React from 'react';
 
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import Button from '@components/Button/Button';
 import Header from '@components/Header/Header';
-import { fonts } from '@constants/fonts';
-import { spacing } from '@constants/spacing';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
 import { logout } from '@store/slices/authSlice';
 import { useTheme } from '@theme/ThemeContext';
+import { forwardChevronIcon } from '@utils/rtl';
+import { useLanguage } from '@hooks/useLanguage';
 
-
-const ProfileScreen = ({ navigation }: any) => {
-  const { theme } = useTheme();
+const ProfileScreen = ({ navigation }: { navigation: { navigate: (screen: string) => void } }) => {
+  const { isDark } = useTheme();
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Logout', onPress: () => dispatch(logout()), style: 'destructive' },
-      ]
-    );
+    Alert.alert(t('common.logout'), t('common.logoutConfirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('common.logout'),
+        onPress: () => dispatch(logout()),
+        style: 'destructive',
+      },
+    ]);
   };
 
+  const primaryColor = '#007AFF';
+  const secondaryTextColor = isDark ? '#8E8E93' : '#AEAEB2';
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Header title="Profile" />
-      <View style={styles.content}>
-        <View style={[styles.profileHeader, { borderBottomColor: theme.colors.border }]}>
-          <View style={[styles.avatar, { backgroundColor: theme.colors.primary }]}>
-            <Text style={styles.avatarText}>
+    <View className="flex-1 bg-white dark:bg-gray-900">
+      <Header title={t('common.profile')} showBack={false} />
+      <View className="flex-1 p-lg">
+        <View className="flex-row items-center pb-xl border-b border-gray-100 dark:border-gray-800 mb-xl">
+          <View className="w-20 h-20 rounded-full justify-center items-center bg-primary">
+            <Text className="text-[32px] font-bold text-white">
               {user?.name?.charAt(0) || 'U'}
             </Text>
           </View>
-          <View style={styles.userInfo}>
-            <Text style={[styles.userName, { color: theme.colors.text }]}>
+          <View className="ms-lg items-start flex-1">
+            <Text className="text-xl font-bold text-black dark:text-white text-start">
               {user?.name || 'User'}
             </Text>
-            <Text style={[styles.userEmail, { color: theme.colors.secondaryText }]}>
+            <Text className="text-md mt-xs text-gray-600 dark:text-gray-400 text-start">
               {user?.email || 'email@example.com'}
             </Text>
           </View>
         </View>
 
-        <View style={styles.menuContainer}>
-          <TouchableOpacity 
-            style={[styles.menuItem, { borderBottomColor: theme.colors.border }]}
+        <View className="mb-xxl">
+          <TouchableOpacity
+            className="flex-row items-center py-md border-b border-gray-100 dark:border-gray-800"
             onPress={() => navigation.navigate('EditProfile')}
           >
-            <Icon name="account-edit" size={24} color={theme.colors.primary} />
-            <Text style={[styles.menuText, { color: theme.colors.text }]}>Edit Profile</Text>
-            <Icon name="chevron-right" size={24} color={theme.colors.secondaryText} />
+            <Icon name="account-edit" size={24} color={primaryColor} />
+            <Text className="flex-1 text-md text-black dark:text-white ms-md text-start">
+              {t('common.editProfile')}
+            </Text>
+            <Icon
+              name={forwardChevronIcon(isRTL)}
+              size={24}
+              color={secondaryTextColor}
+            />
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[styles.menuItem, { borderBottomColor: theme.colors.border }]}
+          <TouchableOpacity
+            className="flex-row items-center py-md border-b border-gray-100 dark:border-gray-800"
             onPress={() => navigation.navigate('Settings')}
           >
-            <Icon name="cog" size={24} color={theme.colors.primary} />
-            <Text style={[styles.menuText, { color: theme.colors.text }]}>Settings</Text>
-            <Icon name="chevron-right" size={24} color={theme.colors.secondaryText} />
+            <Icon name="cog" size={24} color={primaryColor} />
+            <Text className="flex-1 text-md text-black dark:text-white ms-md text-start">
+              {t('common.settings')}
+            </Text>
+            <Icon
+              name={forwardChevronIcon(isRTL)}
+              size={24}
+              color={secondaryTextColor}
+            />
           </TouchableOpacity>
         </View>
 
         <Button
-          title="Logout"
+          title={t('common.logout')}
           variant="danger"
           onPress={handleLogout}
-          style={styles.logoutButton}
+          className="mt-auto"
         />
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    padding: spacing.lg,
-  },
-  profileHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingBottom: spacing.xl,
-    borderBottomWidth: 1,
-    marginBottom: spacing.xl,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  userInfo: {
-    marginLeft: spacing.lg,
-  },
-  userName: {
-    fontSize: fonts.size.xl,
-    fontWeight: fonts.weight.bold,
-  },
-  userEmail: {
-    fontSize: fonts.size.md,
-    marginTop: spacing.xs,
-  },
-  menuContainer: {
-    marginBottom: spacing.xxl,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-  },
-  menuText: {
-    flex: 1,
-    marginLeft: spacing.md,
-    fontSize: fonts.size.md,
-  },
-  logoutButton: {
-    marginTop: 'auto',
-  },
-});
 
 export default ProfileScreen;

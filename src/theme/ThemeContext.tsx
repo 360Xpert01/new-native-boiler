@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
-
-import { useColorScheme } from 'react-native';
+import React, { createContext, useContext, useState, useMemo } from 'react';
+import { useColorScheme as useReactNativeColorScheme } from 'react-native';
+import { useColorScheme as useNativeWindColorScheme } from 'nativewind';
 
 import { darkTheme } from './darkTheme';
 import { lightTheme, Theme } from './lightTheme';
@@ -17,14 +17,30 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const systemColorScheme = useColorScheme();
-  const [themeMode, setThemeMode] = useState<ThemeMode>('system');
+  const systemColorScheme = useReactNativeColorScheme();
+  const { setColorScheme } = useNativeWindColorScheme();
+  const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
 
-  const isDark = themeMode === 'system' ? systemColorScheme === 'dark' : themeMode === 'dark';
+  const setThemeMode = (mode: ThemeMode) => {
+    setThemeModeState(mode);
+    setColorScheme(mode);
+  };
+
+  const isDark = useMemo(() => {
+    return themeMode === 'system' ? systemColorScheme === 'dark' : themeMode === 'dark';
+  }, [themeMode, systemColorScheme]);
+
   const theme = isDark ? darkTheme : lightTheme;
 
+  const contextValue = useMemo(() => ({
+    theme,
+    themeMode,
+    setThemeMode,
+    isDark,
+  }), [theme, themeMode, isDark]);
+
   return (
-    <ThemeContext.Provider value={{ theme, themeMode, setThemeMode, isDark }}>
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   );
@@ -37,3 +53,4 @@ export const useTheme = () => {
   }
   return context;
 };
+
