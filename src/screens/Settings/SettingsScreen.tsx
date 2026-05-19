@@ -22,7 +22,7 @@ const SettingsScreen = () => {
 
   return (
     <View className="flex-1 bg-white dark:bg-gray-900">
-      <Header title={t('common.settings')} />
+      {/* <Header title={t('common.settings')} /> */}
       <ScrollView contentContainerClassName="p-lg">
         <View className="mb-xl">
           <Text className="text-sm font-bold uppercase mb-sm px-xs text-primary text-start">

@@ -27,6 +27,8 @@ import {
   REGISTER,
 } from 'redux-persist';
 
+import { baseApi } from '@services/api/baseApi';
+
 import rootReducer from './rootReducer';
 
 // ── Persist Config ─────────────────────────────────────────────
@@ -47,7 +49,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }),
+    }).concat(baseApi.middleware),
 });
 
 // ── Persistor ──────────────────────────────────────────────────

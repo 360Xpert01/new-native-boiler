@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useMemo } from 'react';
-import { useColorScheme as useReactNativeColorScheme } from 'react-native';
+
 import { useColorScheme as useNativeWindColorScheme } from 'nativewind';
+import { useColorScheme as useReactNativeColorScheme } from 'react-native';
 
 import { darkTheme } from './darkTheme';
 import { lightTheme, Theme } from './lightTheme';

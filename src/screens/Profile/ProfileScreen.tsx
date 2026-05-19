@@ -1,16 +1,16 @@
 import React from 'react';
 
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import Button from '@components/Button/Button';
 import Header from '@components/Header/Header';
+import { useLanguage } from '@hooks/useLanguage';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
 import { logout } from '@store/slices/authSlice';
 import { useTheme } from '@theme/ThemeContext';
 import { forwardChevronIcon } from '@utils/rtl';
-import { useLanguage } from '@hooks/useLanguage';
 
 const ProfileScreen = ({ navigation }: { navigation: { navigate: (screen: string) => void } }) => {
   const { isDark } = useTheme();

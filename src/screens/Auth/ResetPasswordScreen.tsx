@@ -1,10 +1,10 @@
 import React from 'react';
 
 import { yupResolver } from '@hookform/resolvers/yup';
+import { StackScreenProps } from '@react-navigation/stack';
 import { useForm, Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { View, Text, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { StackScreenProps } from '@react-navigation/stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as yup from 'yup';
 

@@ -20,8 +20,8 @@ import Button from '@components/Button/Button';
 import Input from '@components/Input/Input';
 import LanguagePicker from '@components/LanguagePicker/LanguagePicker';
 import { useToast } from '@components/Toast/ToastContext';
+import { useSignupMutation } from '@services/api/authApi';
 import { useAppDispatch } from '@store/hooks';
-import { setLoading } from '@store/slices/authSlice';
 
 const schema = yup.object().shape({
   name: yup.string().required('Name is required'),
@@ -44,6 +44,7 @@ const SignupScreen = ({
   const { t } = useTranslation();
   const { showToast } = useToast();
   const dispatch = useAppDispatch();
+  const [signup, { isLoading }] = useSignupMutation();
 
   React.useEffect(() => {
     const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
@@ -72,13 +73,9 @@ const SignupScreen = ({
     },
   });
 
-  const onSignup = async (data: { email: string }) => {
-    dispatch(setLoading(true));
-    setTimeout(() => {
-      dispatch(setLoading(false));
-      showToast(t('auth.otpSentEmail'), 'success');
-      navigation.navigate('OTP', { email: data.email, type: 'signup' });
-    }, 1500);
+  const onSignup = async (data: { email: string; name: string }) => {
+    showToast(t('auth.otpSentEmail'), 'success');
+    navigation.navigate('OTP', { email: data.email, type: 'signup' });
   };
 
   return (
@@ -174,6 +171,7 @@ const SignupScreen = ({
               <Button
                 title={t('auth.signup')}
                 onPress={handleSubmit(onSignup)}
+                loading={isLoading}
                 className="mt-lg"
               />
 

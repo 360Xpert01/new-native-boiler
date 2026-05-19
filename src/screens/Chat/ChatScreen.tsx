@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+import { useTranslation } from 'react-i18next';
 import {
   View,
   Text,
@@ -9,7 +10,6 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
 
 import Header from '@components/Header/Header';
 import { useSocket } from '@hooks/useSocket';

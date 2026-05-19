@@ -6,6 +6,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { useLanguage } from '@hooks/useLanguage';
 import SplashScreen from '@screens/Splash/SplashScreen';
 import { useAppSelector } from '@store/hooks';
+import { selectAppReady } from '@store/slices/appSlice';
 import { useTheme } from '@theme/ThemeContext';
 
 import AuthStack from './AuthStack';
@@ -14,7 +15,6 @@ import { navigationRef } from './navigationRef';
 import { RootStackParamList } from './types';
 
 
-import { selectAppReady } from '@store/slices/appSlice';
 
 const Stack = createStackNavigator<RootStackParamList>();
 

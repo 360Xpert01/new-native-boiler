@@ -16,6 +16,8 @@
 
 import { combineReducers } from '@reduxjs/toolkit';
 
+import { baseApi } from '@services/api/baseApi';
+
 import appReducer from './slices/appSlice';
 import authReducer from './slices/authSlice';
 import chatReducer from './slices/chatSlice';
@@ -24,6 +26,7 @@ import socketReducer from './slices/socketSlice';
 import themeReducer from './slices/themeSlice';
 
 const rootReducer = combineReducers({
+  [baseApi.reducerPath]: baseApi.reducer,
   auth: authReducer,
   theme: themeReducer,
   app: appReducer,

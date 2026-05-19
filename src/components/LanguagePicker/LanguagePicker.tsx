@@ -14,8 +14,8 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-import { AppLanguage } from '@i18n/config';
 import { useLanguage } from '@hooks/useLanguage';
+import { AppLanguage } from '@i18n/config';
 import { useTheme } from '@theme/ThemeContext';
 
 if (

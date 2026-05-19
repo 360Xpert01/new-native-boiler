@@ -6,8 +6,9 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { ActivityIndicator, LayoutAnimation, Platform, UIManager, View } from 'react-native';
+
 import i18n from 'i18next';
+import { ActivityIndicator, LayoutAnimation, Platform, UIManager, View } from 'react-native';
 
 import {
   AppLanguage,

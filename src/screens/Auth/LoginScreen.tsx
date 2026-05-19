@@ -20,8 +20,9 @@ import Button from '@components/Button/Button';
 import Input from '@components/Input/Input';
 import LanguagePicker from '@components/LanguagePicker/LanguagePicker';
 import { useToast } from '@components/Toast/ToastContext';
-import { useAppDispatch, useAppSelector } from '@store/hooks';
-import { setCredentials, setLoading, selectAuthLoading } from '@store/slices/authSlice';
+import { useLoginMutation } from '@services/api/authApi';
+import { useAppDispatch } from '@store/hooks';
+import { setCredentials } from '@store/slices/authSlice';
 
 const schema = yup.object().shape({
   email: yup.string().email('Invalid email').required('Email is required'),
@@ -35,6 +36,7 @@ const LoginScreen = ({ navigation }: { navigation: { navigate: (screen: string) 
   const { t } = useTranslation();
   const { showToast } = useToast();
   const dispatch = useAppDispatch();
+  const [login, { isLoading }] = useLoginMutation();
 
   React.useEffect(() => {
     const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
@@ -61,20 +63,14 @@ const LoginScreen = ({ navigation }: { navigation: { navigate: (screen: string) 
     },
   });
 
-  const isLoading = useAppSelector(selectAuthLoading);
-
   const onLogin = async (data: { email: string; password: string }) => {
-    dispatch(setLoading(true));
-    setTimeout(() => {
-      dispatch(
-        setCredentials({
-          user: { id: '1', email: data.email, name: 'Test User' },
-          token: 'fake-jwt-token',
-        }),
-      );
-      dispatch(setLoading(false));
-      showToast(t('common.loginSuccess'), 'success');
-    }, 1500);
+    dispatch(
+      setCredentials({
+        user: { id: '1', email: data.email, name: 'Demo User' },
+        token: 'fake-jwt-token',
+      }),
+    );
+    showToast(t('common.loginSuccess'), 'success');
   };
 
   return (

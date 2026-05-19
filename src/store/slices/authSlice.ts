@@ -5,10 +5,8 @@
  * This slice is persisted to AsyncStorage (see store.ts whitelist).
  */
 
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import api from '@services/api/api';
-import { ENDPOINTS } from '@services/api/apiEndpoints';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import type { RootState } from '@store/store';
 
@@ -36,19 +34,6 @@ const initialState: AuthState = {
   error: null,
 };
 
-// ── Async Thunks ───────────────────────────────────────────────
-export const login = createAsyncThunk(
-  'auth/login',
-  async (credentials: any, { rejectWithValue }) => {
-    try {
-      const response = await api.post(ENDPOINTS.auth.login, credentials);
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Login failed');
-    }
-  }
-);
-
 // ── Slice ──────────────────────────────────────────────────────
 const authSlice = createSlice({
   name: 'auth',
@@ -62,6 +47,8 @@ const authSlice = createSlice({
       state.user = action.payload.user;
       state.token = action.payload.token;
       state.isAuthenticated = true;
+      // Also save to AsyncStorage for legacy compatibility if needed
+      AsyncStorage.setItem('userToken', action.payload.token);
     },
 
     /** Clear all auth state on logout */
@@ -73,33 +60,20 @@ const authSlice = createSlice({
       AsyncStorage.removeItem('userToken');
     },
 
-    /** Toggle loading state */
+    /** Toggle loading state (useful for manual transitions) */
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
+    },
+
+    /** Set error manually */
+    setError: (state, action: PayloadAction<string | null>) => {
+      state.error = action.payload;
     },
 
     /** Clear error */
     clearError: (state) => {
       state.error = null;
     },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(login.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(login.fulfilled, (state, action: PayloadAction<{ user: User; token: string }>) => {
-        state.isLoading = false;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
-        state.isAuthenticated = true;
-        AsyncStorage.setItem('userToken', action.payload.token);
-      })
-      .addCase(login.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload as string;
-      });
   },
 });
 

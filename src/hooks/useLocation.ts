@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+
 import { Platform, PermissionsAndroid, Alert } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
@@ -17,6 +18,8 @@ export const useLocation = () => {
     loading: false,
     error: null,
   });
+
+  const watchIdRef = useRef<number | null>(null);
 
   const requestPermission = useCallback(async () => {
     if (Platform.OS === 'android') {
@@ -62,6 +65,7 @@ export const useLocation = () => {
       return;
     }
 
+    // 1. Get initial position immediately so user doesn't wait
     Geolocation.getCurrentPosition(
       (position) => {
         setLocation({
@@ -81,7 +85,46 @@ export const useLocation = () => {
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
     );
+
+    // 2. Clear any existing watch tracking to prevent duplicates
+    if (watchIdRef.current !== null) {
+      Geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+
+    // 3. Start real-time continuous GPS tracking subscription
+    const watchId = Geolocation.watchPosition(
+      (position) => {
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          loading: false,
+          error: null,
+        });
+      },
+      (error) => {
+        // Log live tracking errors without annoying standard popup alerts
+        console.warn('GPS Live Tracking Error:', error);
+      },
+      {
+        enableHighAccuracy: true,
+        distanceFilter: 3, // Update coordinates every 3 meters of physical movement
+        interval: 3000,    // Query physical GPS chip every 3 seconds
+        fastestInterval: 1500,
+      }
+    );
+
+    watchIdRef.current = watchId;
   }, [requestPermission]);
+
+  // Clean up GPS tracking on hook unmount to prevent any battery leaks
+  useEffect(() => {
+    return () => {
+      if (watchIdRef.current !== null) {
+        Geolocation.clearWatch(watchIdRef.current);
+      }
+    };
+  }, []);
 
   return { ...location, getCurrentLocation };
 };

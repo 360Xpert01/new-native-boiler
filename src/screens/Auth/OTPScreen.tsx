@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+import { StackScreenProps } from '@react-navigation/stack';
 import { useTranslation } from 'react-i18next';
 import {
   View,
@@ -12,7 +13,6 @@ import {
   LayoutAnimation,
   Keyboard,
 } from 'react-native';
-import { StackScreenProps } from '@react-navigation/stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import Button from '@components/Button/Button';
@@ -93,7 +93,8 @@ const OTPScreen = ({ route, navigation }: Props) => {
     dispatch(setLoading(true));
     setTimeout(() => {
       dispatch(setLoading(false));
-      if (otpValue === '123456') {
+      // For demo, accept any 6-digit code entered by the user
+      if (otpValue.length === 6) {
         if (type === 'signup') {
           dispatch(
             setCredentials({

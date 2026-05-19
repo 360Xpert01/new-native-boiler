@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import EmptyState from '@components/EmptyState/EmptyState';

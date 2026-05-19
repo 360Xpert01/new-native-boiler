@@ -1,10 +1,10 @@
 import React from 'react';
 
-import { useTranslation } from 'react-i18next';
 import {
   createDrawerNavigator,
   DrawerToggleButton,
 } from '@react-navigation/drawer';
+import { useTranslation } from 'react-i18next';
 
 import { useLanguage } from '@hooks/useLanguage';
 import SettingsScreen from '@screens/Settings/SettingsScreen';

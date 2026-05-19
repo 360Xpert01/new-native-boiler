@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { useTranslation } from 'react-i18next';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useTranslation } from 'react-i18next';
 import { View, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
