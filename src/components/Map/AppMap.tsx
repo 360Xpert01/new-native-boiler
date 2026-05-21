@@ -39,32 +39,9 @@ const AppMap: React.FC<AppMapProps> = ({
   const { isDark } = useTheme();
   const cameraRef = React.useRef<CameraRef>(null);
 
-  const googleMapsStyle = React.useMemo(() => ({
-    version: 8 as const,
-    sources: {
-      'google-tiles': {
-        type: 'raster' as const,
-        tiles: [
-          'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&scale=3'
-        ],
-        tileSize: 256,
-        attribution: '© Google',
-      },
-    },
-    layers: [
-      {
-        id: 'google-tiles-layer',
-        type: 'raster' as const,
-        source: 'google-tiles',
-        minzoom: 0,
-        maxzoom: 22,
-      },
-    ],
-  }), []);
-
   const mapStyle = isDark
     ? 'https://tiles.openfreemap.org/styles/dark'
-    : googleMapsStyle;
+    : 'https://tiles.openfreemap.org/styles/liberty';
 
   // Default to Islamabad coordinates if none provided
   const centerCoordinate: [number, number] =
