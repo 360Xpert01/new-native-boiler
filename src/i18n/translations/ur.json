@@ -41,7 +41,9 @@
     "logoutConfirm": "کیا آپ واقعی لاگ آؤٹ کرنا چاہتے ہیں؟",
     "cancel": "منسوخ",
     "noLocationData": "مقام کا ڈیٹا نہیں",
-    "offlineReconnecting": "آف لائن — دوبارہ منسلک ہونے کی کوشش..."
+    "offlineReconnecting": "آف لائن — دوبارہ منسلک ہونے کی کوشش...",
+    "myLocation": "میری لوکیشن",
+    "searchPlaceholder": "مقام تلاش کریں..."
   },
   "auth": {
     "login": "لاگ ان",

@@ -39,9 +39,32 @@ const AppMap: React.FC<AppMapProps> = ({
   const { isDark } = useTheme();
   const cameraRef = React.useRef<CameraRef>(null);
 
+  const googleMapsStyle = React.useMemo(() => ({
+    version: 8 as const,
+    sources: {
+      'google-tiles': {
+        type: 'raster' as const,
+        tiles: [
+          'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&scale=3'
+        ],
+        tileSize: 256,
+        attribution: '© Google',
+      },
+    },
+    layers: [
+      {
+        id: 'google-tiles-layer',
+        type: 'raster' as const,
+        source: 'google-tiles',
+        minzoom: 0,
+        maxzoom: 22,
+      },
+    ],
+  }), []);
+
   const mapStyle = isDark
     ? 'https://tiles.openfreemap.org/styles/dark'
-    : 'https://tiles.openfreemap.org/styles/bright';
+    : googleMapsStyle;
 
   // Default to Islamabad coordinates if none provided
   const centerCoordinate: [number, number] =
@@ -59,6 +82,55 @@ const AppMap: React.FC<AppMapProps> = ({
       },
     };
   }, [routeCoords]);
+
+  // Define GeoJSON shape for walking/connection dashed lines
+  const walkingGeoJson = React.useMemo(() => {
+    if (!routeCoords || routeCoords.length === 0 || !longitude || !latitude || !destination) {
+      return null;
+    }
+
+    const startCoords: [number, number] = [longitude, latitude];
+    const endCoords: [number, number] = [destination.longitude, destination.latitude];
+    
+    const roadStart = routeCoords[0];
+    const roadEnd = routeCoords[routeCoords.length - 1];
+
+    const features: any[] = [];
+
+    // Helper to check if there is any difference between the two coordinates
+    const isSignificantGap = (c1: [number, number], c2: [number, number]) => {
+      return c1[0] !== c2[0] || c1[1] !== c2[1];
+    };
+
+    if (isSignificantGap(startCoords, roadStart)) {
+      features.push({
+        type: 'Feature' as const,
+        properties: { id: 'start-walk' },
+        geometry: {
+          type: 'LineString' as const,
+          coordinates: [startCoords, roadStart],
+        },
+      });
+    }
+
+    if (isSignificantGap(roadEnd, endCoords)) {
+      features.push({
+        type: 'Feature' as const,
+        properties: { id: 'end-walk' },
+        geometry: {
+          type: 'LineString' as const,
+          coordinates: [roadEnd, endCoords],
+        },
+      });
+    }
+
+    if (features.length === 0) return null;
+
+    return {
+      type: 'FeatureCollection' as const,
+      features,
+    };
+  }, [routeCoords, longitude, latitude, destination]);
 
   const lastProcessedTriggerRef = React.useRef(0);
   const waitingForCoordsRef = React.useRef(false);
@@ -100,9 +172,19 @@ const AppMap: React.FC<AppMapProps> = ({
     prevCoordsRef.current = { latitude, longitude };
   }, [latitude, longitude, locationTrigger]);
 
+  // Fly to destination smoothly when a new destination is set
+  React.useEffect(() => {
+    if (!destination || !cameraRef.current) return;
+    cameraRef.current.flyTo({
+      center: [destination.longitude, destination.latitude],
+      zoom: 15,
+      duration: 2000,
+    });
+  }, [destination]);
+
   return (
-    <View 
-      style={[styles.container, style]} 
+    <View
+      style={[styles.container, style]}
       className={className}
       onStartShouldSetResponderCapture={() => {
         onTouchStart?.();
@@ -123,6 +205,15 @@ const AppMap: React.FC<AppMapProps> = ({
             onSelectDestination?.({
               longitude: coords[0],
               latitude: coords[1],
+            });
+          }
+        }}
+        onDidFinishLoadingMap={() => {
+          if (latitude && longitude && cameraRef.current) {
+            cameraRef.current.flyTo({
+              center: [longitude, latitude],
+              zoom: 15,
+              duration: 2000,
             });
           }
         }}
@@ -154,9 +245,30 @@ const AppMap: React.FC<AppMapProps> = ({
           </GeoJSONSource>
         )}
 
+        {/* Draw walking connection dashed lines from actual locations to roads */}
+        {walkingGeoJson && (
+          <GeoJSONSource id="walkingSource" data={walkingGeoJson}>
+            <Layer
+              id="walkingLine"
+              type="line"
+              paint={{
+                'line-color': '#3b82f6',
+                'line-width': 4,
+                'line-opacity': 0.8,
+                'line-dasharray': [1, 2], // Dot-dot-dot walking pattern
+              }}
+              layout={{
+                'line-cap': 'round',
+                'line-join': 'round',
+              }}
+            />
+          </GeoJSONSource>
+        )}
+
         {showMarker && (
           <ViewAnnotation
             id="userLocation"
+            key={`user-${centerCoordinate[0]}-${centerCoordinate[1]}`}
             lngLat={centerCoordinate}
           >
             <View className="items-center justify-center w-8 h-8">
@@ -174,6 +286,7 @@ const AppMap: React.FC<AppMapProps> = ({
         {destination && (
           <ViewAnnotation
             id="destinationLocation"
+            key={`dest-${destination.longitude}-${destination.latitude}`}
             lngLat={[destination.longitude, destination.latitude]}
           >
             <View className="items-center justify-center w-8 h-8">

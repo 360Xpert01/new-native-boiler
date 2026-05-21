@@ -41,7 +41,9 @@
     "logoutConfirm": "Are you sure you want to logout?",
     "cancel": "Cancel",
     "noLocationData": "No location data",
-    "offlineReconnecting": "Offline — Trying to reconnect..."
+    "offlineReconnecting": "Offline — Trying to reconnect...",
+    "myLocation": "My Location",
+    "searchPlaceholder": "Search for a location..."
   },
   "auth": {
     "login": "Login",
